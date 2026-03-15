@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AgroCalc — Технологическая ведомость ресурсов</title>
+    <meta name="description" content="Онлайн-калькулятор посевных ресурсов для агрономов. Расчет семян, ГСМ и удобрений.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header no-print">
+            <div class="logo-area">
+                <h1>AgroCalc <span class="badge">Online</span></h1>
+            </div>
+            <button class="btn-primary main-print-btn" onclick="window.print()">
+                <span>🖨️ Печать ведомости</span>
+            </button>
+        </header>
+
+        <main class="app-content no-print">
+            <div class="setup-grid">
+                <section class="setup-sidebar">
+                    <div class="card shadow">
+                        <h2 class="card-header">Параметры участка</h2>
+                        <div class="form-group">
+                            <label for="area">Общая площадь (га)</label>
+                            <input type="number" id="area" value="100" step="0.1" inputmode="decimal">
+                        </div>
+                        <div class="form-group">
+                            <label for="crop-preset">Шаблон культуры</label>
+                            <select id="crop-preset"></select>
+                        </div>
+                        <div class="actions">
+                            <button id="add-resource" class="btn-outline">+ Добавить ресурс</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="resources-area">
+                    <div id="resources-container" class="res-grid">
+                        </div>
+                </section>
+            </div>
+        </main>
+
+        <div id="printable-document" class="print-only">
+            <div class="doc-header">
+                <h2>ТЕХНОЛОГИЧЕСКАЯ ВЕДОМОСТЬ</h2>
+                <div class="doc-meta">
+                    <p>Объект: Площадь <strong id="print-area">0</strong> га</p>
+                    <p id="print-date"></p>
+                </div>
+            </div>
+            <table class="doc-table">
+                <thead>
+                    <tr>
+                        <th>Ресурс</th>
+                        <th>Норма/га</th>
+                        <th>Итоговый объем</th>
+                    </tr>
+                </thead>
+                <tbody id="print-table-body"></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="2">ОБЩИЙ ВЕС РЕСУРСОВ:</td>
+                        <td id="print-grand-total"></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="doc-signatures">
+                <div class="sig-item">Агроном: ________________</div>
+                <div class="sig-item">Принял: ________________</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
