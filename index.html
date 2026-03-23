@@ -3,78 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AgroCalc — Технологическая ведомость ресурсов</title>
-    <meta name="description" content="Онлайн-калькулятор посевных ресурсов для агрономов. Расчет семян, ГСМ и удобрений.">
+    <title>AgroCom — Технологическая ведомость</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="app-container">
         <header class="app-header no-print">
-            <div class="logo-area">
-                <h1>AgroCalc <span class="badge">Online</span></h1>
-            </div>
-            <button class="btn-primary main-print-btn" onclick="window.print()">
-                <span>🖨️ Печать ведомости</span>
-            </button>
+            <div class="logo-area"><h1>AgroCom</h1></div>
+            <button class="btn-primary" onclick="window.print()">Печать ведомости</button>
         </header>
 
         <main class="app-content no-print">
+            <div class="card total-card shadow no-print">
+                <h2 class="card-header">Сводка затрат и план</h2>
+                <div class="total-row">
+                    <span>Общий объем ресурсов:</span>
+                    <span id="ui-grand-total" class="total-value">0 кг</span>
+                </div>
+                <div class="total-row" style="border-top: 1px dashed #cbd5e1; margin-top: 8px; padding-top: 8px;">
+                    <span>Общая стоимость:</span>
+                    <span id="ui-total-cost" class="total-value" style="color: #16a34a;">0 ₽</span>
+                </div>
+                <div class="total-row secondary" style="margin-top: 10px;">
+                    <span>Техника: <strong id="ui-tech-count">0</strong> ед. (1 на 50 га)</span>
+                </div>
+                <div class="total-row secondary">
+                    <span>Сбор: <strong id="ui-harvest-time">—</strong></span>
+                    <span>Условия: <strong id="ui-harvest-cond">—</strong></span>
+                </div>
+                <div class="total-row secondary" style="border-top: 1px solid #e2e8f0; margin-top: 8px; padding-top: 8px;">
+                    <span>Площадь: <strong id="ui-area-display">0</strong> га</span>
+                </div>
+            </div>
+
             <div class="setup-grid">
                 <section class="setup-sidebar">
                     <div class="card shadow">
-                        <h2 class="card-header">Параметры участка</h2>
+                        <h2 class="card-header">Настройки участка</h2>
                         <div class="form-group">
-                            <label for="area">Общая площадь (га)</label>
-                            <input type="number" id="area" value="100" step="0.1" inputmode="decimal">
+                            <label>Площадь (га)</label>
+                            <input type="number" id="area" value="100" step="0.1">
                         </div>
                         <div class="form-group">
-                            <label for="crop-preset">Шаблон культуры</label>
-                            <select id="crop-preset"></select>
+                            <label>Культура</label>
+                            <div class="select-group">
+                                <select id="crop-preset"></select>
+                                <button id="delete-preset" class="btn-icon-delete">✕</button>
+                            </div>
                         </div>
-                        <div class="actions">
-                            <button id="add-resource" class="btn-outline">+ Добавить ресурс</button>
+                        <div class="actions-group">
+                            <button id="add-resource" class="btn-outline">+ Ресурс</button>
+                            <button id="add-new-preset" class="btn-outline btn-new-crop">+ Новая культура</button>
                         </div>
                     </div>
                 </section>
-
                 <section class="resources-area">
-                    <div id="resources-container" class="res-grid">
-                        </div>
+                    <div id="resources-container" class="res-grid"></div>
                 </section>
             </div>
         </main>
 
+        <div id="modal-overlay" class="modal-overlay" style="display: none;">
+            <div class="card modal-content shadow">
+                <h2 class="card-header">Новая культура</h2>
+                <div class="form-grid">
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Название</label>
+                        <input type="text" id="new-name" placeholder="напр. Кукуруза">
+                    </div>
+                    <div class="form-group">
+                        <label>Сбор (начало)</label>
+                        <select id="harvest-start">
+                            <option value="Май">Май</option><option value="Июнь">Июнь</option>
+                            <option value="Июль">Июль</option><option value="Август">Август</option>
+                            <option value="Сентябрь">Сентябрь</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Сбор (конец)</label>
+                        <select id="harvest-end">
+                            <option value="Июль">Июль</option><option value="Август">Август</option>
+                            <option value="Сентябрь">Сентябрь</option><option value="Октябрь">Октябрь</option>
+                            <option value="Ноябрь">Ноябрь</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label>Условия</label>
+                        <input type="text" id="new-harvest-cond" placeholder="напр. Влажность 12-14%">
+                    </div>
+                </div>
+                <div class="actions-group" style="flex-direction: row; gap: 10px;">
+                    <button id="save-new-preset" class="btn-primary" style="flex:1">Сохранить</button>
+                    <button id="close-modal" class="btn-outline" style="flex:1">Отмена</button>
+                </div>
+            </div>
+        </div>
+
         <div id="printable-document" class="print-only">
             <div class="doc-header">
                 <h2>ТЕХНОЛОГИЧЕСКАЯ ВЕДОМОСТЬ</h2>
-                <div class="doc-meta">
-                    <p>Объект: Площадь <strong id="print-area">0</strong> га</p>
-                    <p id="print-date"></p>
-                </div>
+                <p>Площадь: <strong id="print-area">0</strong> га | Дата: <span id="print-date"></span></p>
             </div>
             <table class="doc-table">
-                <thead>
-                    <tr>
-                        <th>Ресурс</th>
-                        <th>Норма/га</th>
-                        <th>Итоговый объем</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>Ресурс</th><th>Норма</th><th>Итого (Кол-во)</th><th>Сумма (₽)</th></tr></thead>
                 <tbody id="print-table-body"></tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="2">ОБЩИЙ ВЕС РЕСУРСОВ:</td>
-                        <td id="print-grand-total"></td>
-                    </tr>
-                </tfoot>
             </table>
-            <div class="doc-signatures">
-                <div class="sig-item">Агроном: ________________</div>
-                <div class="sig-item">Принял: ________________</div>
-            </div>
         </div>
     </div>
-
     <script src="config.js"></script>
     <script src="script.js"></script>
 </body>
