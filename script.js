@@ -69,7 +69,23 @@ document.addEventListener('DOMContentLoaded', () => {
         container.appendChild(card);
         calculate();
     }
+    function deleteCurrentPreset() {
+        const selectedKey = presetSelect.value;
 
+        if (!selectedKey || !selectedKey.startsWith('custom_')) {
+            alert("Этот пресет является системным и его нельзя удалить.");
+            return;
+        }
+        const userPresets = JSON.parse(localStorage.getItem('userPresets')) || {};
+        if (userPresets[selectedKey]) {
+            delete userPresets[selectedKey];
+                
+            localStorage.setItem('userPresets', JSON.stringify(userPresets));
+            initApp();
+            localStorage.removeItem('agroData');
+                
+        }
+    }
     function calculate() {
         const area = parseFloat(areaInput?.value) || 0;
         let totalKg = 0; let totalL = 0; let totalCash = 0;
@@ -117,22 +133,37 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('ui-harvest-cond').innerText = cur.harvestCondition || '—';
         }
         document.getElementById('print-date').innerText = new Date().toLocaleDateString();
+        document.getElementById('print-area').innerText = areaInput.value
         saveState();
     }
 
     function saveState() {
-        const data = {
+        const selectedKey = presetSelect.value;
+        
+        const currentItems = Array.from(document.querySelectorAll('.res-card')).map(c => ({
+            title: c.querySelector('.res-title').value,
+            rate: parseFloat(c.querySelector('.res-rate').value) || 0,
+            unit: c.querySelector('.res-unit-select').value,
+            price: parseFloat(c.querySelector('.res-price').value) || 0
+        }));
+
+        const sessionData = {
             area: areaInput.value,
-            currentPreset: presetSelect.value,
-            items: Array.from(document.querySelectorAll('.res-card')).map(c => ({
-                title: c.querySelector('.res-title').value,
-                rate: c.querySelector('.res-rate').value,
-                unit: c.querySelector('.res-unit-select').value,
-                price: c.querySelector('.res-price').value
-            }))
+            currentPreset: selectedKey,
+            items: currentItems 
         };
-        localStorage.setItem('agroData', JSON.stringify(data));
-    }
+        localStorage.setItem('agroData', JSON.stringify(sessionData));
+
+        if (selectedKey && selectedKey.startsWith('custom_')) {
+            const userPresets = JSON.parse(localStorage.getItem('userPresets')) || {};
+            
+            if (userPresets[selectedKey]) {
+                userPresets[selectedKey].items = currentItems;
+                
+                localStorage.setItem('userPresets', JSON.stringify(userPresets));
+            }
+        }
+}
 
     function applyPreset() {
         const all = getFullPresets();
@@ -164,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.getElementById('add-resource').onclick = () => createCard();
+    document.getElementById('delete-preset').onclick = () => deleteCurrentPreset();
     areaInput.oninput = calculate;
     presetSelect.onchange = applyPreset;
     initApp();
